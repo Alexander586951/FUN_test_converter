@@ -8,6 +8,7 @@ from . import views
 app_name = 'converter_app'
 urlpatterns = [
     path('', views.model_form_upload, name='upload_form'),
+    # path('home/', views.home, name='home'),
     # path('success/', views.download_result, name='download_link')
 ]
 

@@ -56,6 +56,7 @@ def process_file(act_input_file, gift_output_file):
 
     with open(gift_output_file, 'w', encoding='utf-8') as o_f:
         # line stamp to confirm successful file exchange
+        o_f.write(f"//source: {act_input_file}, conversion date: {date.today()}\n")
         o_f.write("//Processed through Django web application")
         o_f.write(' \n')
 
@@ -99,7 +100,7 @@ def process_file(act_input_file, gift_output_file):
                           + f" {q_body[1]}\n")
                 o_f.write(' \n')
 
-    return o_f
+    # return o_f
 
 
 def convert():

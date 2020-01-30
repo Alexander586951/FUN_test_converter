@@ -1,11 +1,17 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Тест тестировщика</title>
+</head>
 
-{% block content %}
+
+<body>
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Upload</button>
+    <button type="submit">Сконвертировать</button>
   </form>
 
-  <p><a href="{% url 'home' %}">Return to home</a></p>
-{% endblock %}
+<!--  <p><a href="{% url 'converter_app:upload_form' %}">Return to home</a></p>-->
+</body>
+</html>

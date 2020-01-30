@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>{% block title %} Тест тестировщика {% endblock %}</title>
+	<title> Тест тестировщика </title>
 </head>
 
 
 <body>
-{% block content %}Контент{% endblock %}
+
+<p><a href="{% url 'converter_app:upload_form' %}">Upload form link</a></p>
+
 </body>
 </html>
