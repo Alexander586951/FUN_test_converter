@@ -1,11 +1,9 @@
-from django.http import HttpResponse, HttpResponseRedirect
 from pathlib import Path
 from slugify import slugify
 
 from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from .forms import DocumentForm
-
 
 from django.http import FileResponse
 

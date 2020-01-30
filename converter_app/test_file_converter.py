@@ -1,6 +1,7 @@
 import random
 import sys
 from datetime import date
+from pathlib import Path
 
 
 def nonblank_lines(f):
@@ -26,6 +27,7 @@ def process_file(act_input_file, gift_output_file):
     test_data = {}
 
     with open(act_input_file, encoding='utf-8') as f_i:
+        input_filename = Path(act_input_file).parts[-1]
         i_counter = 0
         for line in nonblank_lines(f_i):
 
@@ -56,7 +58,7 @@ def process_file(act_input_file, gift_output_file):
 
     with open(gift_output_file, 'w', encoding='utf-8') as o_f:
         # line stamp to confirm successful file exchange
-        o_f.write(f"//source: {act_input_file}, conversion date: {date.today()}\n")
+        o_f.write(f"//source: {input_filename}, conversion date: {date.today()}\n")
         o_f.write("//Processed through Django web application")
         o_f.write(' \n')
 
