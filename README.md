@@ -44,8 +44,12 @@
 
 ### Описание работы
 
+![screenshot_1](https://github.com/Alexander586951/FUN_test_converter/blob/master/media/images/2020-01-30_16-23-36.png?raw=true "Вид формы")
+
 1. Нажать кнопку "Выбрать файл" - система предложит выбрать файл с исходным тестом.
 2. Нажать кнопку "Сконвертировать" -  браузер предложит скачать файл с результатом работы.
+
+![screenshot_2](https://github.com/Alexander586951/FUN_test_converter/blob/master/media/images/2020-01-30_16-23-56.png?raw=true "Сохранение файла")
 
 
 ### Очистка места и базы данных
