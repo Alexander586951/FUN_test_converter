@@ -1,8 +1,12 @@
 import random
 import sys
+import re
+
 from datetime import date
 from pathlib import Path
 
+
+# TODO: def a function with regex match for input and list of strings for output
 
 def nonblank_lines(f):
     """
@@ -20,6 +24,10 @@ def nonblank_lines(f):
 def randomize_list(source_list):
     random.shuffle(source_list)
     return source_list
+
+
+def find_a_match(regex, source):
+    pass
 
 
 def process_file(act_input_file, gift_output_file):
@@ -41,20 +49,27 @@ def process_file(act_input_file, gift_output_file):
                 i_counter += 1
                 test_data[f'{i_counter}'] = {}
                 test_data[f'{i_counter}']['head'] = \
-                    line.replace('I: ', '').strip()
+                    line.replace('I:', '').strip()
                 test_data[f'{i_counter}']['pos_answer'] = []
                 test_data[f'{i_counter}']['neg_answer'] = []
+                test_data[f'{i_counter}']['left_column'] = []
+                test_data[f'{i_counter}']['right_column'] = []
             elif 'S:' in line:
                 test_data[f'{i_counter}']['body'] = \
-                    line.replace('S: ', '').strip()
+                    line.replace('S:', '').replace('### ###', '').strip()
             elif '+:' not in line and '-:' not in line:
                 test_data[f'{i_counter}']['body'] += ('\n' + line)
             elif '+:' in line:
                 test_data[f'{i_counter}']['pos_answer'] \
-                    .append(line.replace('+: ', '').strip())
+                    .append(line.replace('+:', '').strip())
             elif '-:' in line:
                 test_data[f'{i_counter}']['neg_answer'] \
-                    .append(line.replace('-: ', '').strip())
+                    .append(line.replace('-:', '').strip())
+    # test prints
+    # for k in test_head_data:
+    #     print('test_head:', k, ':', test_head_data[k])
+    # for k in test_data:
+    #     print('test_data:', k, ':', test_data)
 
     with open(gift_output_file, 'w', encoding='utf-8') as o_f:
         # line stamp to confirm successful file exchange
@@ -117,7 +132,8 @@ def convert():
         output_file = f'GIFT_{out_path_name[-1].replace(".txt", "")}_{today}.txt'
 
         process_file(file_name, output_file)
-        success_message = f'Файл {output_file} готов\nОн лежит в том же каталоге, что и исходный файл\n'
+        success_message = f'Файл {output_file} готов\nОн лежит в том же ' \
+                          f'каталоге, что и исходный файл\n'
         print(success_message)
     else:
         print('Отсутствует файл для обработки.\n'
