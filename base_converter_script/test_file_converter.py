@@ -4,6 +4,11 @@ from datetime import date
 
 import re
 
+
+# TODO: Нужна корректная логика для вопросов сопоставления: L1 -> R1, L2 -> R2 etc.
+# TODO: Нужна логика множественных числовых ответов, см. референсный документ по GIFT
+
+# константы-формулировки сложных служебных паттернов
 LEFT_QUESTION_PATTERN = r'L[0-9]?\:'
 RIGHT_QUESTION_PATTERN = r'R[0-9]?\:'
 SEQUENCE_PATTERN = r'[0-9]?\:'
@@ -108,10 +113,6 @@ def process_file(act_input_file, gift_output_file):
     test_head_data = {}
     test_data = {}
 
-    # LEFT_QUESTION_PATTERN = r'L[0-9]?\:'
-    # RIGHT_QUESTION_PATTERN = r'R[0-9]?\:'
-    # SEQUENCE_PATTERN = r'[0-9]?\:'
-
     with open(act_input_file, encoding='utf-8') as f_i:
         i_counter = 0
         for line in nonblank_lines(f_i):
@@ -182,7 +183,7 @@ def process_file(act_input_file, gift_output_file):
 
             neg_answer_count = len(test_data[q]['neg_answer'])
             l_answer_count = len(test_data[q]['left_answer'])
-            r_answer_count = len(test_data[q]['right_answer'])
+            # r_answer_count = len(test_data[q]['right_answer'])
 
             # GIFT не поддерживает вопросы на сопоставление с неравными
             # списками вариантов. Искусственно выравниваем их.
