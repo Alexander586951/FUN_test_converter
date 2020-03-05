@@ -32,6 +32,8 @@
 
 3. Для создания базы данных проводим миграцию
 
+    `python manage.py makemigrations`
+
     `python manage.py migrate`
 
 4. Запускаем сервер :
