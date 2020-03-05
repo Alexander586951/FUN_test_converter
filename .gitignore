@@ -3,6 +3,7 @@
 test_converter/__pycache__/
 /media/documents/*.txt
 /media/gift_converted/*.txt
+/sources/
 
 ### Python ###
 .idea/
