@@ -4,7 +4,6 @@ from datetime import date
 
 import re
 
-
 # TODO: Нужна корректная логика для вопросов сопоставления: L1 -> R1, L2 -> R2 etc.
 # TODO: Нужна логика множественных числовых ответов, см. референсный документ по GIFT
 
@@ -12,6 +11,7 @@ import re
 LEFT_QUESTION_PATTERN = r'L[0-9]?\:'
 RIGHT_QUESTION_PATTERN = r'R[0-9]?\:'
 SEQUENCE_PATTERN = r'[0-9]?\:'
+
 
 def nonblank_lines(f):
     """
@@ -27,29 +27,45 @@ def nonblank_lines(f):
 
 
 def randomize_list(source_list):
+    """
+    Перемешиваем список случайным образом
+    """
     random.shuffle(source_list)
     return source_list
 
-def isfloat(value):
-  try:
-    float(value)
-    return True
-  except ValueError:
-    return False
 
+def isfloat(value):
+    """
+    Проверка на числовой результат
+    """
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
 
 
 def process_title_line(line: str, pattern: str):
     """
-    Обработка
-        - титульных закомментированных строк
-        - строк названия вопроса
+    Обработка титульных закомментированных строк
     :param line: строка из исходного файла
     :param pattern: служебная комбинация символов
     :return: обработанная строка
     """
     res_line = line.replace(f'{pattern} ', '').replace(f'{pattern}', '').strip()
     return res_line
+
+
+def process_question_title(line: str, pattern: str):
+    """
+    Обработка строк названия вопроса
+    :param line: строка из исходного файла
+    :param pattern: служебная комбинация символов
+    :return: обработанная строка
+    """
+    res_line = line.replace(f'{pattern} ', '').replace(f'{pattern}', '').strip()
+    return res_line
+
 
 def process_question_body(line: str, pattern: str):
     """
@@ -60,8 +76,8 @@ def process_question_body(line: str, pattern: str):
     """
     if '<p>' in line and '</p>' in line:
         line = '[html]' + line
-    res_line = line.replace(f'{pattern} ', '')\
-        .replace(f'{pattern}', '').replace('#', '').strip()
+    res_line = line.replace(f'{pattern} ', '').replace(f'{pattern}', '')\
+        .replace('#', '').strip()
     return res_line
 
 
@@ -87,9 +103,9 @@ def process_positive_answer(line: str, pattern: str, target_list: list):
     :param pattern: служебная комбинация символов
     :param target_list: список, содержащий правильные ответы
     """
-    if "^\S" in line and "\S*$" in line:
-        line = line.replace("+:^\S*(", "").replace(")\S*$)", "")\
-            .replace("\S*$","").split('|')
+    if r"^\S" in line and r"\S*$" in line:
+        line = line.replace(r"+:^\S*(", "").replace(r")\S*$)", "")\
+            .replace(r"\S*$", "").split('|')
         for text in line:
             target_list.append(text)
     else:
@@ -108,7 +124,6 @@ def process_negative_answer(line: str, pattern: str, target_list: list):
     target_list.append(res_line)
 
 
-
 def process_file(act_input_file, gift_output_file):
     test_head_data = {}
     test_data = {}
@@ -124,7 +139,7 @@ def process_file(act_input_file, gift_output_file):
             elif 'I:' in line:
                 i_counter += 1
                 test_data[f'{i_counter}'] = {}
-                test_data[f'{i_counter}']['head'] = process_title_line(
+                test_data[f'{i_counter}']['head'] = process_question_title(
                     line, 'I:'
                 )
 
@@ -223,7 +238,8 @@ def process_file(act_input_file, gift_output_file):
                 else:
                     o_f.write(f"{test_data[q]['body']} " + "{")
                     for pos_answer in test_data[q]['pos_answer']:
-                        if isfloat(pos_answer): # TODO: заменить на корректное выстраивание множественных цифровых ответов
+                        if isfloat \
+                                (pos_answer):   # TODO: заменить на корректное выстраивание множественных цифровых ответов
                             # print("it's digits!")
                             o_f.write(f"#{pos_answer} ")
                         else:
@@ -234,7 +250,7 @@ def process_file(act_input_file, gift_output_file):
             # запись вопроса на сопоставление
             elif neg_answer_count == 0 and l_answer_count > 0:
                 match_list = list(zip(
-                    test_data[q]['left_answer'],test_data[q]['right_answer']
+                    test_data[q]['left_answer'] ,test_data[q]['right_answer']
                 ))
                 o_f.write(f"::{test_data[q]['head']}::{test_data[q]['body']} ")
                 o_f.write("{\n")
