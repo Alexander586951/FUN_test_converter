@@ -4,9 +4,6 @@ from datetime import date
 
 import re
 
-# TODO: Нужна корректная логика для вопросов сопоставления: L1 -> R1, L2 -> R2 etc.
-# TODO: Нужна логика множественных числовых ответов, см. референсный документ по GIFT
-
 # константы-формулировки сложных служебных паттернов
 LEFT_QUESTION_PATTERN = r'L[0-9]?\:'
 RIGHT_QUESTION_PATTERN = r'R[0-9]?\:'
@@ -45,6 +42,21 @@ def isfloat(value):
         return False
 
 
+def is_fully_digital(source_list: list):
+    """
+    Проверка списка строк на то, что все его субстроки
+    содержат целые или дробные числа
+    :param source_list:
+    :return:
+    """
+    for item in source_list:
+        if item.isalpha():
+            return False
+        elif item.isdigit() or isfloat(item):
+            pass
+    return True
+
+
 def process_title_line(line: str, pattern: str):
     """
     Обработка титульных закомментированных строк
@@ -81,7 +93,7 @@ def process_question_body(line: str, pattern: str):
     return res_line
 
 
-def process_pairing_answers(line: str, pattern: str):
+def process_match_answers(line: str, pattern: str):
     """
     Обработка ответов в вопросе на сопоставление
     :param line: строка из исходного файла
@@ -154,13 +166,20 @@ def process_file(act_input_file, gift_output_file):
 
             # считываем ответы L1, L2,... R1, R2...
             elif re.match(LEFT_QUESTION_PATTERN, line):
-                test_data[f'{i_counter}']['left_answer'].append(
-                    process_pairing_answers(line, LEFT_QUESTION_PATTERN)
-                )
+                # l = re.match(LEFT_QUESTION_PATTERN, line)
+                # print(line.split(':'))
+                test_data[f'{i_counter}']['left_answer'].append \
+                    (line)
+                # test_data[f'{i_counter}']['left_answer'].append(
+                #     process_match_answers(line, LEFT_QUESTION_PATTERN)
+                # )
             elif re.match(RIGHT_QUESTION_PATTERN, line):
-                test_data[f'{i_counter}']['right_answer'].append(
-                    process_pairing_answers(line, RIGHT_QUESTION_PATTERN)
-                )
+                # test_data[f'{i_counter}']['right_answer'].append(
+                #     process_match_answers(line, RIGHT_QUESTION_PATTERN)
+                # )
+                test_data[f'{i_counter}']['right_answer'].append(line)
+
+
 
             # преобразуем вопрос на последовательность
             # в вопрос на сопоставление
@@ -183,6 +202,7 @@ def process_file(act_input_file, gift_output_file):
                 process_negative_answer(line, '-:',
                                         test_data[f'{i_counter}']['neg_answer'])
 
+    # print(test_data)
 
     with open(gift_output_file, 'w', encoding='utf-8') as o_f:
 
@@ -198,19 +218,10 @@ def process_file(act_input_file, gift_output_file):
 
             neg_answer_count = len(test_data[q]['neg_answer'])
             l_answer_count = len(test_data[q]['left_answer'])
-            # r_answer_count = len(test_data[q]['right_answer'])
-
-            # GIFT не поддерживает вопросы на сопоставление с неравными
-            # списками вариантов. Искусственно выравниваем их.
-            while len(test_data[q]['right_answer']) < len(test_data[q]['left_answer']):
-                test_data[q]['right_answer'].append(' ')
-            while len(test_data[q]['left_answer']) < len(test_data[q]['right_answer']):
-                test_data[q]['left_answer'].append(' ')
 
             # запись вопроса multiple choice
             if neg_answer_count >= 1:
                 o_f.write(f"::{test_data[q]['head']}::{test_data[q]['body']} ")
-                o_f.write("{\n")
 
                 answers = []
                 for pos_answer in test_data[q]['pos_answer']:
@@ -219,6 +230,11 @@ def process_file(act_input_file, gift_output_file):
                 for neg_answer in test_data[q]['neg_answer']:
                     neg_answer = '~' + neg_answer
                     answers.append(neg_answer)
+
+                if is_fully_digital(answers):
+                    o_f.write("{#\n")
+                else:
+                    o_f.write("{\n")
 
                 for answer in randomize_list(answers):
                     o_f.write(f"\t{answer} \n")
@@ -240,7 +256,6 @@ def process_file(act_input_file, gift_output_file):
                     for pos_answer in test_data[q]['pos_answer']:
                         if isfloat \
                                 (pos_answer):   # TODO: заменить на корректное выстраивание множественных цифровых ответов
-                            # print("it's digits!")
                             o_f.write(f"#{pos_answer} ")
                         else:
                             o_f.write(f"={pos_answer} ")
@@ -249,15 +264,41 @@ def process_file(act_input_file, gift_output_file):
 
             # запись вопроса на сопоставление
             elif neg_answer_count == 0 and l_answer_count > 0:
-                match_list = list(zip(
-                    test_data[q]['left_answer'] ,test_data[q]['right_answer']
-                ))
-                o_f.write(f"::{test_data[q]['head']}::{test_data[q]['body']} ")
-                o_f.write("{\n")
-                for pair in match_list:
-                    o_f.write(f"\t={pair[0]}\t-> {pair[1]} \n")
-                o_f.write('}\n')
-                o_f.write(' \n')
+                test_left = test_data[q]['left_answer'][0]
+                if re.match(LEFT_QUESTION_PATTERN, test_left):
+                    match_answers = []
+                    l_len = len(test_data[q]['left_answer'])
+                    for r_string in test_data[q]['right_answer']:
+                        for l_string in test_data[q]['left_answer']:
+                            if (int(r_string[1]) in range(0, l_len+1)
+                                    and r_string[1] == l_string[1]):
+                                res_string = f"={l_string.split(':')[1]}\t--> " \
+                                             f"{r_string.split(':')[1]}"
+                                match_answers.append(res_string)
+                            elif int(r_string[1]) not in range(0, l_len+1):
+                                res_string = f"=   \t--> {r_string.split(':')[1]}"
+                                if res_string not in match_answers:
+                                    match_answers.append(res_string)
+
+                    o_f.write(f"::{test_data[q]['head']}::{test_data[q]['body']} ")
+                    o_f.write("{\n")
+                    for line in match_answers:
+                        o_f.write(f"\t{line}\n")
+                    o_f.write('}\n')
+                    o_f.write(' \n')
+
+                # запись вопросов на последовательность
+                elif re.match(SEQUENCE_PATTERN, test_left):
+                    match_list = list(zip(test_data[q]['left_answer '],
+                                          test_data[q]['right_answer']))
+                    o_f.write(f"::{test_data[q]['head']}::"
+                              f"{test_data[q]['body']} ")
+                    o_f.write("{\n")
+                    for pair in match_list:
+                        o_f.write(f"\t={pair[0]}\t-> {pair[1]} \n")
+                    o_f.write('}\n')
+                    o_f.write(' \n')
+
 
 
 def convert():

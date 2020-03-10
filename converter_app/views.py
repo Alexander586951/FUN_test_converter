@@ -7,7 +7,6 @@ from .forms import DocumentForm
 
 from django.http import FileResponse, HttpResponse
 
-# Imaginary function to handle an uploaded file.
 from .test_file_converter import process_file as test_convert
 
 
